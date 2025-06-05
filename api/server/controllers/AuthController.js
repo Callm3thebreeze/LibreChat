@@ -1,6 +1,7 @@
 const cookies = require('cookie');
 const jwt = require('jsonwebtoken');
-const openIdClient = require('openid-client');
+// Importar openid-client dinámicamente en las funciones donde se use
+// const openIdClient = require('openid-client');
 const { logger } = require('@librechat/data-schemas');
 const {
   registerUser,
@@ -64,11 +65,11 @@ const refreshController = async (req, res) => {
     : null;
   if (!refreshToken) {
     return res.status(200).send('Refresh token not provided');
-  }
-  if (token_provider === 'openid' && isEnabled(process.env.OPENID_REUSE_TOKENS) === true) {
+  }  if (token_provider === 'openid' && isEnabled(process.env.OPENID_REUSE_TOKENS) === true) {
     try {
       const openIdConfig = getOpenIdConfig();
-      const tokenset = await openIdClient.refreshTokenGrant(openIdConfig, refreshToken);
+      const { refreshTokenGrant } = await import('openid-client');
+      const tokenset = await refreshTokenGrant(openIdConfig, refreshToken);
       const claims = tokenset.claims();
       const user = await findUser({ email: claims.email });
       if (!user) {

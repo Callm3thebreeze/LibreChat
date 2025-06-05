@@ -1,11 +1,9 @@
 const fetch = require('node-fetch');
 const passport = require('passport');
-const client = require('openid-client');
 const jwtDecode = require('jsonwebtoken/decode');
 const { CacheKeys } = require('librechat-data-provider');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const { hashToken, logger } = require('@librechat/data-schemas');
-const { Strategy: OpenIDStrategy } = require('openid-client/passport');
 const { getStrategyFunctions } = require('~/server/services/Files/strategies');
 const { findUser, createUser, updateUser } = require('~/models');
 const { getBalanceConfig } = require('~/server/services/Config');
@@ -22,20 +20,6 @@ let openidConfig = null;
 
 //overload currenturl function because of express version 4 buggy req.host doesn't include port
 //More info https://github.com/panva/openid-client/pull/713
-
-class CustomOpenIDStrategy extends OpenIDStrategy {
-  currentUrl(req) {
-    const hostAndProtocol = process.env.DOMAIN_SERVER;
-    return new URL(`${hostAndProtocol}${req.originalUrl ?? req.url}`);
-  }
-  authorizationRequestParams(req, options) {
-    const params = super.authorizationRequestParams(req, options);
-    if (options?.state && !params.has('state')) {
-      params.set('state', options.state);
-    }
-    return params;
-  }
-}
 
 /**
  * Exchange the access token for a new access token using the on-behalf-of flow if required.
@@ -55,7 +39,9 @@ const exchangeAccessTokenIfNeeded = async (config, accessToken, sub, fromCache =
         return cachedToken.access_token;
       }
     }
-    const grantResponse = await client.genericGrantRequest(
+
+    const { genericGrantRequest } = await import('openid-client');
+    const grantResponse = await genericGrantRequest(
       config,
       'urn:ietf:params:oauth:grant-type:jwt-bearer',
       {
@@ -86,7 +72,8 @@ const exchangeAccessTokenIfNeeded = async (config, accessToken, sub, fromCache =
 const getUserInfo = async (config, accessToken, sub) => {
   try {
     const exchangedAccessToken = await exchangeAccessTokenIfNeeded(config, accessToken, sub);
-    return await client.fetchUserInfo(config, exchangedAccessToken, sub);
+    const { fetchUserInfo } = await import('openid-client');
+    return await fetchUserInfo(config, exchangedAccessToken, sub);
   } catch (error) {
     logger.warn(`[openidStrategy] getUserInfo: Error fetching user info: ${error}`);
     return null;
@@ -118,7 +105,6 @@ const downloadImage = async (url, config, accessToken, sub) => {
     if (process.env.PROXY) {
       options.agent = new HttpsProxyAgent(process.env.PROXY);
     }
-
     const response = await fetch(url, options);
 
     if (response.ok) {
@@ -197,6 +183,24 @@ function convertToUsername(input, defaultValue = '') {
  */
 async function setupOpenId() {
   try {
+    const { discovery, customFetch } = await import('openid-client');
+    const { Strategy: OpenIDStrategy } = await import('openid-client/passport');
+
+    // Definir CustomOpenIDStrategy aquí
+    class CustomOpenIDStrategy extends OpenIDStrategy {
+      currentUrl(req) {
+        const hostAndProtocol = process.env.DOMAIN_SERVER;
+        return new URL(`${hostAndProtocol}${req.originalUrl ?? req.url}`);
+      }
+      authorizationRequestParams(req, options) {
+        const params = super.authorizationRequestParams(req, options);
+        if (options?.state && !params.has('state')) {
+          params.set('state', options.state);
+        }
+        return params;
+      }
+    }
+
     /** @type {ClientMetadata} */
     const clientMetadata = {
       client_id: process.env.OPENID_CLIENT_ID,
@@ -204,14 +208,14 @@ async function setupOpenId() {
     };
 
     /** @type {Configuration} */
-    openidConfig = await client.discovery(
+    openidConfig = await discovery(
       new URL(process.env.OPENID_ISSUER),
       process.env.OPENID_CLIENT_ID,
       clientMetadata,
     );
     if (process.env.PROXY) {
       const proxyAgent = new HttpsProxyAgent(process.env.PROXY);
-      openidConfig[client.customFetch] = (...args) => {
+      openidConfig[customFetch] = (...args) => {
         return fetch(args[0], { ...args[1], agent: proxyAgent });
       };
       logger.info(`[openidStrategy] proxy agent added: ${process.env.PROXY}`);
@@ -220,6 +224,7 @@ async function setupOpenId() {
     const requiredRoleParameterPath = process.env.OPENID_REQUIRED_ROLE_PARAMETER_PATH;
     const requiredRoleTokenKind = process.env.OPENID_REQUIRED_ROLE_TOKEN_KIND;
     const usePKCE = isEnabled(process.env.OPENID_USE_PKCE);
+
     const openidLogin = new CustomOpenIDStrategy(
       {
         config: openidConfig,
