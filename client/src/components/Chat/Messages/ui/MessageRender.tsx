@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, memo } from 'react';
+import React, { useCallback, useMemo, memo, useRef, useEffect } from 'react';
 import { useRecoilValue } from 'recoil';
 import { type TMessage } from 'librechat-data-provider';
 import type { TMessageProps, TMessageIcon } from '~/common';
@@ -70,6 +70,51 @@ const MessageRender = memo(
     const isLatestMessage = msg?.messageId === latestMessage?.messageId;
     const showCardRender = isLast && !isSubmittingFamily && isCard;
     const isLatestCard = isCard && !isSubmittingFamily && isLatestMessage;
+
+    // Use a ref to track logged messages
+    const loggedMessagesRef = useRef<Set<string>>(new Set());
+
+    // Log message details for AI responses (not user messages) - only once per message
+    useEffect(() => {
+      if (
+        msg &&
+        !msg.isCreatedByUser &&
+        !isSubmittingFamily &&
+        msg.messageId &&
+        !loggedMessagesRef.current.has(msg.messageId)
+      ) {
+        // Mark this message as logged
+        loggedMessagesRef.current.add(msg.messageId);
+
+        let contentType = 'plain text';
+        let codeInfo: { language: string; snippet: string }[] | null = null;
+        const text = msg.text || '';
+
+        if (msg.content) {
+          contentType = 'structured content';
+        } else if (text) {
+          // Check for code blocks
+          const codeBlockRegex = /```([a-zA-Z0-9]*)\n([\s\S]*?)```/g;
+          const matches = [...text.matchAll(codeBlockRegex)];
+
+          if (matches.length > 0) {
+            contentType = 'code block';
+            codeInfo = matches.map((match) => ({
+              language: match[1] || 'unknown',
+              snippet: match[2].substring(0, 50) + (match[2].length > 50 ? '...' : ''),
+            }));
+          }
+        }
+
+        console.log('Chat response:', {
+          type: contentType,
+          text: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
+          content: msg.content || null,
+          codeInfo,
+          messageId: msg.messageId,
+        });
+      }
+    }, [msg, isSubmittingFamily]);
 
     const iconData: TMessageIcon = useMemo(
       () => ({
