@@ -306,4 +306,32 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Ruta para servir diagramas Mermaid generados
+router.get('/mermaid/:fileName', async (req, res) => {
+  try {
+    const { fileName } = req.params;
+
+    // Verificar que el nombre de archivo es seguro (sin inyección de ruta)
+    if (fileName.includes('..') || fileName.includes('/') || fileName.includes('\\')) {
+      return res.status(400).send('Nombre de archivo no válido');
+    }
+
+    // Construir la ruta al archivo
+    const filePath = req.app.locals.paths.uploads + '/mermaid/' + fileName;
+
+    // Verificar que el archivo existe
+    try {
+      await fs.access(filePath);
+    } catch (error) {
+      return res.status(404).send('Diagrama no encontrado');
+    }
+
+    // Servir el archivo
+    res.sendFile(filePath);
+  } catch (error) {
+    logger.error('Error al servir diagrama Mermaid:', error);
+    res.status(500).send('Error al servir el diagrama');
+  }
+});
+
 module.exports = router;
