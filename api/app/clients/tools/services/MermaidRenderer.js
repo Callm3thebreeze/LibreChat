@@ -4,13 +4,16 @@ const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 const crypto = require('crypto');
+// Importar apiRoot desde la configuración de rutas
+const { apiRoot } = require('../../../../config/paths'); // Asegúrate que apiRoot se exporta desde paths.js
 
 /**
  * Servicio para renderizar diagramas Mermaid localmente
  */
 class MermaidRenderer {
   constructor() {
-    this.outputDir = path.join(process.cwd(), 'uploads', 'mermaid');
+    // Guardar en LibreChat/api/uploads/mermaid/
+    this.outputDir = path.join(apiRoot, 'uploads', 'mermaid');
     this.setupOutputDir();
   }
 
@@ -20,7 +23,10 @@ class MermaidRenderer {
   async setupOutputDir() {
     try {
       await fs.mkdir(this.outputDir, { recursive: true });
-      console.log(`Directorio para diagramas Mermaid creado: ${this.outputDir}`);
+      // Loguear la ruta absoluta para confirmación
+      console.log(
+        `Directorio para diagramas Mermaid configurado en: ${path.resolve(this.outputDir)}`,
+      );
     } catch (err) {
       console.error('Error al crear directorio para diagramas Mermaid:', err);
     }
@@ -163,9 +169,8 @@ class MermaidRenderer {
    */
   getResult(fileName) {
     const filePath = path.join(this.outputDir, fileName);
-    // URL relativa para acceder al archivo desde la aplicación
-    const url = `/api/files/mermaid/${fileName}`;
-
+    // Nueva URL para coincidir con la estructura /api/files/
+    const url = `/api/files/uploads/mermaid/${fileName}`;
     return { filePath, url };
   }
 

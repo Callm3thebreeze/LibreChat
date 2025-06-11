@@ -11,6 +11,15 @@ const speech = require('./speech');
 
 const initialize = async () => {
   const router = express.Router();
+
+  // Public route for Mermaid diagrams (no auth required)
+  router.get('/uploads/mermaid/:fileName', (req, res) => {
+    const { fileName } = req.params;
+    const path = require('path');
+    const filePath = path.join(req.app.locals.paths.apiRoot, 'uploads', 'mermaid', fileName);
+    res.sendFile(filePath);
+  });
+
   router.use(requireJwtAuth);
   router.use(checkBan);
   router.use(uaParser);

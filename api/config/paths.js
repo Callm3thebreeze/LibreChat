@@ -2,6 +2,7 @@ const path = require('path');
 
 module.exports = {
   root: path.resolve(__dirname, '..', '..'),
+  apiRoot: path.resolve(__dirname, '..'), // <--- Añadir esta línea
   uploads: path.resolve(__dirname, '..', '..', 'uploads'),
   clientPath: path.resolve(__dirname, '..', '..', 'client'),
   dist: path.resolve(__dirname, '..', '..', 'client', 'dist'),

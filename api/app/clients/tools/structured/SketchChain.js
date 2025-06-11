@@ -27,17 +27,18 @@ class SketchChain extends Tool {
   }
   async formatRenderedImage(code) {
     try {
-      // Generar imagen localmente (esto sigue funcionando para guardar la imagen)
+      // Generar imagen localmente
       const { url } = await MermaidRenderer.renderDiagram(code);
       console.log('🖼️ Mermaid Image URL (local):', url);
 
-      // Pero usar la URL externa para mostrarla en el chat (esto funciona en el frontend)
-      const payload = JSON.stringify({ code });
-      const encoded = base64url(payload);
-      const externalUrl = `https://mermaid.ink/img/${encoded}`;
-      console.log('🖼️ Mermaid Image URL (external for display):', externalUrl);
+      // La URL debe ser absoluta con el formato que espera el frontend
+      // Usamos URL absoluta para asegurar que se carga correctamente
+      const absoluteUrl = url.startsWith('http')
+        ? url
+        : `${process.env.HOST_URL || 'http://localhost:3080'}${url}`;
+      console.log('🖼️ Mermaid Image URL (absolute):', absoluteUrl);
 
-      return `![Mermaid Diagram](${externalUrl})`;
+      return `![Mermaid Diagram](${absoluteUrl})`;
     } catch (err) {
       console.error('Error renderizando diagrama:', err);
       // Si hay un error en la generación local, mostrar mensaje de error
