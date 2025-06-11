@@ -22,6 +22,7 @@ const {
   StructuredACS,
   TraversaalSearch,
   StructuredWolfram,
+  SketchChain,
   createYouTubeTools,
   TavilySearchResults,
   createOpenAIImageTools,
@@ -159,6 +160,7 @@ const loadTools = async ({
     'azure-ai-search': StructuredACS,
     traversaal_search: TraversaalSearch,
     tavily_search_results_json: TavilySearchResults,
+    'diagram-builder': SketchChain,
   };
 
   const customConstructors = {

@@ -192,5 +192,13 @@
         "description": "Provide your Flux API key from your user profile."
       }
     ]
+  },
+  {
+    "name": "SketchChain Diagram Builder",
+    "pluginKey": "diagram-builder",
+    "description": "Convierte descripciones en texto en diagramas Mermaid renderizados como imagen en Markdown.",
+    "icon": "https://mermaid.js.org/favicon.ico",
+    "isAgent": true,
+    "authConfig": []
   }
 ]
