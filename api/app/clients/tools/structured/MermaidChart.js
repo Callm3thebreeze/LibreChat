@@ -48,11 +48,14 @@ class MermaidChart extends Tool {
   returnValue(value) {
     return this.isAgent ? [value, {}] : value;
   }
+
   async _call({ prompt }) {
-    if (!prompt) {
-      throw new Error('Falta el campo requerido: prompt');
-    }
     const cleaned = prompt.trim();
+
+    if (!cleaned) {
+      throw new Error('El prompt no puede estar vacío o solo contener espacios');
+    }
+
     const mermaidCode = this.extractMermaidCode(cleaned) || cleaned;
 
     // Log del código que se va a usar para imagen
