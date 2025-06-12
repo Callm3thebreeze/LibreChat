@@ -306,28 +306,22 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Ruta para servir diagramas Mermaid generados
 router.get('/uploads/mermaid/:fileName', async (req, res) => {
   try {
     const { fileName } = req.params;
 
-    // Verificar que el nombre de archivo es seguro (sin inyección de ruta)
     if (fileName.includes('..') || fileName.includes('/') || fileName.includes('\\')) {
       return res.status(400).send('Nombre de archivo no válido');
     }
 
-    // Construir la ruta al archivo DENTRO de la carpeta api/uploads/mermaid
-    const filePath = path.join(req.app.locals.paths.apiRoot, 'uploads', 'mermaid', fileName); // <--- Usar apiRoot aquí
-
-    // Verificar que el archivo existe
+    const filePath = path.join(req.app.locals.paths.apiRoot, 'uploads', 'mermaid', fileName);
     try {
       await fs.access(filePath);
     } catch (error) {
-      logger.error(`Diagrama no encontrado en: ${filePath}`, error); // Loguear la ruta completa para depuración
+      logger.error(`Diagrama no encontrado en: ${filePath}`, error);
       return res.status(404).send('Diagrama no encontrado');
     }
 
-    // Servir el archivo
     res.sendFile(filePath);
   } catch (error) {
     logger.error('Error al servir diagrama Mermaid:', error);
