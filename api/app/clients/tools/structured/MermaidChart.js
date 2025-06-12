@@ -26,12 +26,9 @@ class MermaidChart extends Tool {
   }
   async formatRenderedImage(code) {
     try {
-      // Generar imagen localmente
       const { url } = await MermaidRenderer.renderDiagram(code);
       console.log('🖼️ Mermaid Image URL (local):', url);
 
-      // La URL debe ser absoluta con el formato que espera el frontend
-      // Usamos URL absoluta para asegurar que se carga correctamente
       const absoluteUrl = url.startsWith('http')
         ? url
         : `${process.env.HOST_URL || 'http://localhost:3080'}${url}`;
@@ -40,7 +37,6 @@ class MermaidChart extends Tool {
       return `![Mermaid Diagram](${absoluteUrl})`;
     } catch (err) {
       console.error('Error renderizando diagrama:', err);
-      // Si hay un error en la generación local, mostrar mensaje de error
       return `❌ Error en la generación de la imagen del diagrama: ${err.message}`;
     }
   }
@@ -58,14 +54,11 @@ class MermaidChart extends Tool {
 
     const mermaidCode = this.extractMermaidCode(cleaned) || cleaned;
 
-    // Log del código que se va a usar para imagen
     console.log('\n📌 Código Mermaid recibido:');
     console.log(mermaidCode);
     try {
       const codeBlock = this.formatMermaidCode(mermaidCode);
       const imageBlock = await this.formatRenderedImage(mermaidCode);
-
-      // Ya no se incluye el enlace de edición
       const result = `${codeBlock}\n\n${imageBlock}`;
       return this.returnValue(result);
     } catch (err) {
