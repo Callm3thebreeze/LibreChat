@@ -13,8 +13,7 @@ const {
   availableTools,
   manifestToolMap,
   // Basic Tools
-  GoogleSearchAPI,
-  // Structured Tools
+  GoogleSearchAPI, // Structured Tools
   DALLE3,
   FluxAPI,
   OpenWeather,
@@ -22,7 +21,7 @@ const {
   StructuredACS,
   TraversaalSearch,
   StructuredWolfram,
-  SketchChain,
+  MermaidChart,
   createYouTubeTools,
   TavilySearchResults,
   createOpenAIImageTools,
@@ -160,7 +159,7 @@ const loadTools = async ({
     'azure-ai-search': StructuredACS,
     traversaal_search: TraversaalSearch,
     tavily_search_results_json: TavilySearchResults,
-    'diagram-builder': SketchChain,
+    'mermaid-chart': MermaidChart,
   };
 
   const customConstructors = {

@@ -1,6 +1,6 @@
 // Script para probar la generación local de diagramas Mermaid
 const MermaidRenderer = require('./services/MermaidRenderer');
-const SketchChain = require('./structured/SketchChain');
+const MermaidChart = require('./structured/MermaidChart');
 
 // Ejemplo de código Mermaid
 const mermaidCode = `
@@ -18,19 +18,19 @@ async function testMermaidRendering() {
   console.log('=== Test de renderización de diagramas Mermaid ===');
   console.log('Código Mermaid a renderizar:');
   console.log(mermaidCode);
-  
+
   try {
     // 1. Test directo del renderizador
     console.log('\n1. Probando MermaidRenderer directamente:');
     const result = await MermaidRenderer.renderDiagram(mermaidCode);
     console.log('Resultado:', result);
-    
-    // 2. Test a través de SketchChain
-    console.log('\n2. Probando SketchChain:');
-    const sketchChain = new SketchChain();
-    const response = await sketchChain._call({ prompt: mermaidCode });
-    console.log('Respuesta de SketchChain:', response);
-    
+
+    // 2. Test a través de MermaidChart
+    console.log('\n2. Probando MermaidChart:');
+    const mermaidChart = new MermaidChart();
+    const response = await mermaidChart._call({ prompt: mermaidCode });
+    console.log('Respuesta de MermaidChart:', response);
+
     console.log('\n✅ Prueba completada con éxito');
   } catch (error) {
     console.error('\n❌ Error en la prueba:', error);

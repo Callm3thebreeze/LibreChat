@@ -194,9 +194,9 @@
     ]
   },
   {
-    "name": "SketchChain Diagram Builder",
-    "pluginKey": "diagram-builder",
-    "description": "Convierte descripciones en texto en diagramas Mermaid renderizados como imagen en Markdown.",
+    "name": "Mermaid Chart Builder",
+    "pluginKey": "mermaid-chart",
+    "description": "Convierte descripciones de texto a diagramas Mermaid renderizados como imagen.",
     "icon": "https://mermaid.js.org/favicon.ico",
     "isAgent": true,
     "authConfig": []

@@ -5,7 +5,7 @@ const MermaidRenderer = require('../services/MermaidRenderer');
 class MermaidChart extends Tool {
   constructor(fields = {}) {
     super();
-    this.name = 'mermaid-chart';
+    this.name = 'mermaid-builder';
     this.description =
       'Convierte descripciones de texto a diagramas Mermaid renderizados como imagen.';
     this.description_for_model =
